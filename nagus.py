@@ -5,6 +5,7 @@ import os
 import json
 import zipfile
 import shutil
+import glob
 
 # pylint: disable=C0103
 # pylint: disable=W0603
@@ -115,6 +116,30 @@ def add_json(item):
         for package in sync['packages']:
             add_package(package, sync['servers'])
 
+def is_nagus_json(item):
+    """This function does blah."""
+    return os.path.splitext(item)[1] == '.json' and os.path.isfile(item)
+
+def keep_only(items):
+    """This function does blah."""
+    list_to_keep = []
+    for item in items:
+        if is_nagus_json(item):
+            with open(item) as json_file:
+                nagus_file_data = json.load(json_file)
+                list_to_keep.extend(nagus_file_data['packages'])
+        elif os.path.isdir(item):
+            print("dir: " + item)
+            for filename in glob.iglob(item + '/**/nagus_packages.json', recursive=True):
+                with open(filename) as json_file:
+                    nagus_file_data = json.load(json_file)
+                    list_to_keep.extend(nagus_file_data['packages'])
+        else:
+            list_to_keep.append(item)
+    to_remove = [x for x in list_of_packages() if x not in list_to_keep]
+    for pkg in to_remove:
+        rm_package(pkg)
+
 def main():
     """This function does blah."""
     parser = argparse.ArgumentParser()
@@ -125,8 +150,8 @@ def main():
 
     if args.action == "add":
         for item in args.item:
-            if os.path.splitext(item)[1] == '.json' and os.path.isfile(item):
-                print("Adding packages from: " + args.item)
+            if is_nagus_json(item):
+                print("Adding packages from: " + item)
                 add_json(item)
             elif is_package(item):
                 if not has_servers():
@@ -164,10 +189,10 @@ def main():
                     print("Servers:")
                     print(server)
             elif item == 'packages':
+                print("Packages:")
                 for pkg in list_of_packages():
-                    print("Packages:")
                     print(pkg)
-            elif os.path.splitext(item)[1] == '.json' and os.path.isfile(args.item):
+            elif is_nagus_json(item):
                 with open(item) as sync_file:
                     sync = json.load(sync_file)
                     print("Packages:")
@@ -178,6 +203,8 @@ def main():
                         print(server)
             else:
                 print("You can only view servers, packages and nagus json files")
+    elif args.action == 'keep':
+        keep_only(args.item)
 
 if __name__ == "__main__":
     main()
