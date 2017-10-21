@@ -2,14 +2,15 @@
 
 usage:
 ```
-nagus add package_name-2.7.3
-nagus add gandnagus.json
+nagus add package_name-2.7.3 another_packge-1.0.2
+nagus add nagus_packages.json
 
 nagus add user:password@\\smbserver\share\folder\
 nagus add /folder/something/
 nagus add c:\folder\
 
-nagus rm python-2.7.3
+nagus rm package_name-2.7.3 another_package-1.0.2
+nagus rm /folder/something/
 nagus rm c:\folder\
 nagus rm *
 
