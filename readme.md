@@ -11,10 +11,7 @@ nagus add c:\folder\
 
 nagus rm python-2.7.3
 nagus rm c:\folder\
-
-nagus clear servers
-nagus clear packages
-nagus clear all
+nagus rm *
 
 nagus keep ../
 nagus keep python-2.7.3 opencv-1.2.3

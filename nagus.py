@@ -4,6 +4,7 @@ import argparse
 import os
 import json
 import zipfile
+import shutil
 
 # pylint: disable=C0103
 # pylint: disable=W0603
@@ -34,8 +35,7 @@ def save_settings():
         json.dump(settings, settings_file)
 
 def add_server(server_path):
-    """This function does blah."""
-    print("Adding server: " + server_path)
+    """This function does blah.""" 
     global settings
     settings['servers'].append(server_path)
     save_settings()
@@ -63,10 +63,14 @@ def set_stash(directory):
         os.system('setx NAGUS_STASH ' + directory)
         print("I also set OS environment variable NAGUS_PATH to " + directory + " for you")
 
+def list_of_packages():
+    """This function does blah."""
+    return os.listdir(settings['stash'])
+
 def add_package(item):
     """This function does blah."""
-    if os.path.isdir(os.path.join(settings['stash'], item)):
-        print("Package already added")
+    if item in list_of_packages():
+        print("Package already added: " + item)
         return
     found_file = False
     for x in settings['servers']:
@@ -81,10 +85,23 @@ def add_package(item):
     else:
         print("Added package: " + item)
 
+def rm_package(item):
+    """This function does blah."""
+    if not item in list_of_packages():
+        print("package not found: " + item)
+        return
+    print("removing: " + item)
+    shutil.rmtree(os.path.join(settings['stash'], item))
+
+def rm_all_packages():
+    """This function does blah."""
+    for x in list_of_packages():
+        rm_package(x)
+
 def main():
     """This function does blah."""
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=('add', 'rm', 'clear', 'stash'))
+    parser.add_argument('action', choices=('add', 'rm', 'stash'))
     parser.add_argument('item')
     args = parser.parse_args()
 
@@ -97,25 +114,22 @@ def main():
                 print("You can add servers with nagus add <you server path>")
                 requested_server_path = input("Add server now: ")
                 if requested_server_path != "":
+                    print("Adding server: " + requested_server_path)
                     add_server(requested_server_path)
                 else:
                     exit()
             add_package(args.item)
         else:
             print("adding server: " + args.item)
-    elif args.action == "rm":
-        if is_package(args.item):
-            print("removing package: " + args.item)
+            add_server(args.item)
+    elif args.action == 'rm':
+        if args.item == '*':
+            print("removing all packages")
+            rm_all_packages()
+        elif is_package(args.item):
+            rm_package(args.item)
         else:
             print("removing server: " + args.item)
-    elif args.action == "clear":
-        if args.item == "servers":
-            print("clearing all servers")
-        elif args.item == "packages":
-            print("clearing all packages")
-        elif args.item == "all":
-            print("clearing all servers")
-            print("clearing all packages")
     elif args.action == "stash":
         set_stash(args.item)
 
