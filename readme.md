@@ -17,9 +17,9 @@ nagus keep ../
 nagus keep python-2.7.3 opencv-1.2.3
 nagus keep nagus.json
 
-nagus list servers
-nagus list packages
-nagus list nagus.json
+nagus view servers
+nagus view packages
+nagus view nagus.json
 
 nagus stash c:\nagus_stash\
 ```
