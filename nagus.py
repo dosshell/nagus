@@ -93,7 +93,7 @@ def add_package(item, extra_servers=None):
                 print("Added package: " + item + " from " + x)
                 break
     if not found_file:
-        print("Did not find packege: " + item) 
+        print("Did not find packege: " + item)
 
 def rm_package(item):
     """This function does blah."""
@@ -118,59 +118,66 @@ def add_json(item):
 def main():
     """This function does blah."""
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=('add', 'rm', 'stash', 'view'))
-    parser.add_argument('item')
+    parser.add_argument('action', choices=('add', 'rm', 'stash', 'view', 'keep'))
+    parser.add_argument('item', nargs='+')
     args = parser.parse_args()
-
     load_settings()
 
     if args.action == "add":
-        if os.path.splitext(args.item)[1] == '.json' and os.path.isfile(args.item):
-            print("Adding packages from: " + args.item)
-            add_json(args.item)
-        elif is_package(args.item):
-            if not has_servers():
-                print("No servers is set")
-                print("You can add servers with nagus add <you server path>")
-                requested_server_path = input("Add server now: ")
-                if requested_server_path != "":
-                    print("Adding server: " + requested_server_path)
-                    add_server(requested_server_path)
-                else:
-                    exit()
-            add_package(args.item)
-        else:
-            print("adding server: " + args.item)
-            add_server(args.item)
+        for item in args.item:
+            if os.path.splitext(item)[1] == '.json' and os.path.isfile(item):
+                print("Adding packages from: " + args.item)
+                add_json(item)
+            elif is_package(item):
+                if not has_servers():
+                    print("No servers is set")
+                    print("You can add servers with nagus add <you server path>")
+                    requested_server_path = input("Add server now: ")
+                    if requested_server_path != "":
+                        print("Adding server: " + requested_server_path)
+                        add_server(requested_server_path)
+                    else:
+                        exit()
+                add_package(item)
+            else:
+                print("adding server: " + item)
+                add_server(item)
     elif args.action == 'rm':
-        if args.item == '*':
-            print("removing all packages")
-            rm_all_packages()
-        elif is_package(args.item):
-            rm_package(args.item)
-        else:
-            print("removing server: " + args.item)
-            rm_server(args.item)
+        for item in args.item:
+            if item == '*':
+                print("removing all packages")
+                rm_all_packages()
+            elif is_package(item):
+                rm_package(item)
+            else:
+                print("removing server: " + args.item)
+                rm_server(args.item)
     elif args.action == 'stash':
-        set_stash(args.item)
+        if len(args.item) != 1:
+            print("I do not support several stashes")
+            return
+        set_stash(args.item[0])
     elif args.action == 'view':
-        if args.item == 'servers':
-            for server in settings['servers']:
-                print(server)
-        elif args.item == 'packages':
-            for pkg in list_of_packages():
-                print(pkg)
-        elif os.path.splitext(args.item)[1] == '.json' and os.path.isfile(args.item):
-            with open(args.item) as sync_file:
-                sync = json.load(sync_file)
-                print("Packages:")
-                for package in sync['packages']:
-                    print(package)
-                print("Servers:")
-                for server in sync['servers']:
+        for item in args.item:
+            if item == 'servers':
+                for server in settings['servers']:
+                    print("Servers:")
                     print(server)
-        else:
-            print("You can only view servers, packages and nagus json files")
+            elif item == 'packages':
+                for pkg in list_of_packages():
+                    print("Packages:")
+                    print(pkg)
+            elif os.path.splitext(item)[1] == '.json' and os.path.isfile(args.item):
+                with open(item) as sync_file:
+                    sync = json.load(sync_file)
+                    print("Packages:")
+                    for package in sync['packages']:
+                        print(package)
+                    print("Servers:")
+                    for server in sync['servers']:
+                        print(server)
+            else:
+                print("You can only view servers, packages and nagus json files")
 
 if __name__ == "__main__":
     main()
