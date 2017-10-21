@@ -118,7 +118,7 @@ def add_json(item):
 def main():
     """This function does blah."""
     parser = argparse.ArgumentParser()
-    parser.add_argument('action', choices=('add', 'rm', 'stash'))
+    parser.add_argument('action', choices=('add', 'rm', 'stash', 'view'))
     parser.add_argument('item')
     args = parser.parse_args()
 
@@ -151,8 +151,26 @@ def main():
         else:
             print("removing server: " + args.item)
             rm_server(args.item)
-    elif args.action == "stash":
+    elif args.action == 'stash':
         set_stash(args.item)
+    elif args.action == 'view':
+        if args.item == 'servers':
+            for server in settings['servers']:
+                print(server)
+        elif args.item == 'packages':
+            for pkg in list_of_packages():
+                print(pkg)
+        elif os.path.splitext(args.item)[1] == '.json' and os.path.isfile(args.item):
+            with open(args.item) as sync_file:
+                sync = json.load(sync_file)
+                print("Packages:")
+                for package in sync['packages']:
+                    print(package)
+                print("Servers:")
+                for server in sync['servers']:
+                    print(server)
+        else:
+            print("You can only view servers, packages and nagus json files")
 
 if __name__ == "__main__":
     main()
