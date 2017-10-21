@@ -40,6 +40,12 @@ def add_server(server_path):
     settings['servers'].append(server_path)
     save_settings()
 
+def rm_server(server_path):
+    """This function does blah.""" 
+    global settings
+    settings['servers'].remove(server_path)
+    save_settings()
+
 def is_package(item):
     """This function does blah."""
     if "/" not in item and "\\" not in item:
@@ -130,6 +136,7 @@ def main():
             rm_package(args.item)
         else:
             print("removing server: " + args.item)
+            rm_server(args.item)
     elif args.action == "stash":
         set_stash(args.item)
 
