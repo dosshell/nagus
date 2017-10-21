@@ -35,13 +35,13 @@ def save_settings():
         json.dump(settings, settings_file)
 
 def add_server(server_path):
-    """This function does blah.""" 
+    """This function does blah."""
     global settings
     settings['servers'].append(server_path)
     save_settings()
 
 def rm_server(server_path):
-    """This function does blah.""" 
+    """This function does blah."""
     global settings
     settings['servers'].remove(server_path)
     save_settings()
@@ -71,25 +71,29 @@ def set_stash(directory):
 
 def list_of_packages():
     """This function does blah."""
-    return os.listdir(settings['stash'])
+    if os.path.isdir(settings['stash']):
+        return os.listdir(settings['stash'])
+    else:
+        return []
 
-def add_package(item):
+def add_package(item, extra_servers=None):
     """This function does blah."""
     if item in list_of_packages():
         print("Package already added: " + item)
         return
+    if extra_servers is None:
+        extra_servers = []
     found_file = False
-    for x in settings['servers']:
+    for x in settings['servers'] + extra_servers:
         server_file = os.path.join(x, item + '.zip')
         if os.path.isfile(server_file):
             with zipfile.ZipFile(server_file, 'r') as z:
                 z.extractall(os.path.join(settings['stash'], item))
                 found_file = True
+                print("Added package: " + item + " from " + x)
                 break
     if not found_file:
-        print("Did not find packege: " + item)
-    else:
-        print("Added package: " + item)
+        print("Did not find packege: " + item) 
 
 def rm_package(item):
     """This function does blah."""
@@ -104,6 +108,13 @@ def rm_all_packages():
     for x in list_of_packages():
         rm_package(x)
 
+def add_json(item):
+    """This function does blah."""
+    with open(item) as sync_file:
+        sync = json.load(sync_file)
+        for package in sync['packages']:
+            add_package(package, sync['servers'])
+
 def main():
     """This function does blah."""
     parser = argparse.ArgumentParser()
@@ -114,7 +125,10 @@ def main():
     load_settings()
 
     if args.action == "add":
-        if is_package(args.item):
+        if os.path.splitext(args.item)[1] == '.json' and os.path.isfile(args.item):
+            print("Adding packages from: " + args.item)
+            add_json(args.item)
+        elif is_package(args.item):
             if not has_servers():
                 print("No servers is set")
                 print("You can add servers with nagus add <you server path>")
