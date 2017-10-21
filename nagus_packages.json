@@ -1,0 +1,10 @@
+{
+    "packages": [
+        "somepackage-1.3.7",
+        "anotherpackage-5.0.10"
+    ],
+    "servers": [
+        "user:password@\\\\smbserver\\share\\folder\\",
+        "/some/mounted/slow/NFS/drive/"
+	]
+}
