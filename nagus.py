@@ -186,6 +186,11 @@ def main():
                 rm_all_packages()
             elif is_package(item):
                 rm_package(item)
+            elif is_nagus_json(item):
+                with open(item) as sync_file:
+                    sync = json.load(sync_file)
+                    for package in sync['packages']:
+                        rm_package(package)
             else:
                 print("removing server: " + args.item)
                 rm_server(args.item)

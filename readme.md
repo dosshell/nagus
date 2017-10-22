@@ -42,6 +42,7 @@ nagus add c:\folder\
 nagus rm package_name-2.7.3 another_package-1.0.2
 nagus rm /folder/something/
 nagus rm c:\folder\
+nagus rm nagus_packages.json
 nagus rm *
 
 nagus keep ../
