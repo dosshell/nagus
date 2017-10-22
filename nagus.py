@@ -6,13 +6,14 @@ import json
 import zipfile
 import shutil
 import glob
+import subprocess
 
 # pylint: disable=C0103
 # pylint: disable=W0603
 settings = {}
 
 def load_default_settings():
-    """This function does blah."""
+    """Load default settings to global variable `settings`"""
     global settings
     settings = {}
     settings['servers'] = []
@@ -20,7 +21,7 @@ def load_default_settings():
     set_stash(settings['stash'])
 
 def load_settings():
-    """This function does blah."""
+    """Load setting from `settings.json` to global variable `settings`"""
     try:
         with open('settings.json') as settings_file:
             global settings
@@ -30,38 +31,38 @@ def load_settings():
         save_settings()
 
 def save_settings():
-    """This function does blah."""
+    """Save global variable `settings` to `settings.json`"""
     with open('settings.json', 'w') as settings_file:
         global settings
         json.dump(settings, settings_file)
 
 def add_server(server_path):
-    """This function does blah."""
+    """Add a server path to settings"""
     global settings
     settings['servers'].append(server_path)
     save_settings()
 
 def rm_server(server_path):
-    """This function does blah."""
+    """Remove a server path from settings"""
     global settings
     settings['servers'].remove(server_path)
     save_settings()
 
 def is_package(item):
-    """This function does blah."""
+    """Does this string describes a package"""
     if "/" not in item and "\\" not in item:
         return True
     else:
         return False
 
 def has_servers():
-    """This function does blah."""
+    """Do we have atleast one server"""
     if settings['servers']:
         return True
     return False
 
 def set_stash(directory):
-    """This function does blah."""
+    """Set stash to a directory and save it. Also set ENV PATH in windows"""
     print("settings stash to: " + directory)
     os.environ['NAGUS_PATH'] = directory
     settings['stash'] = directory
@@ -71,14 +72,14 @@ def set_stash(directory):
         print("I also set OS environment variable NAGUS_PATH to " + directory + " for you")
 
 def list_of_packages():
-    """This function does blah."""
+    """Return a list of all local packages"""
     if os.path.isdir(settings['stash']):
         return os.listdir(settings['stash'])
     else:
         return []
 
 def add_package(item, extra_servers=None):
-    """This function does blah."""
+    """Download a list of package"""
     if item in list_of_packages():
         print("Package already added: " + item)
         return
@@ -86,6 +87,17 @@ def add_package(item, extra_servers=None):
         extra_servers = []
     found_file = False
     for x in settings['servers'] + extra_servers:
+        #mount server if needed
+        if "@" in x:
+            if os.name == 'nt':
+                username = x.split(':')[0]
+                password = x.split(':')[1].split('@')[0]
+                path = x.split('@')[1]
+                cmd_mount = 'NET USE ' + path + ' /User:' + username + ' ' + password
+                subprocess.run(cmd_mount, stdout=open(os.devnull, 'wb'))
+                x = path
+            else:
+                print("This platform does not support the path: " + x)
         server_file = os.path.join(x, item + '.zip')
         if os.path.isfile(server_file):
             with zipfile.ZipFile(server_file, 'r') as z:
@@ -97,7 +109,7 @@ def add_package(item, extra_servers=None):
         print("Did not find packege: " + item)
 
 def rm_package(item):
-    """This function does blah."""
+    """Remove a local package"""
     if not item in list_of_packages():
         print("package not found: " + item)
         return
@@ -105,23 +117,23 @@ def rm_package(item):
     shutil.rmtree(os.path.join(settings['stash'], item))
 
 def rm_all_packages():
-    """This function does blah."""
+    """Remove all local packages"""
     for x in list_of_packages():
         rm_package(x)
 
 def add_json(item):
-    """This function does blah."""
+    """Download all packages described by a json file"""
     with open(item) as sync_file:
         sync = json.load(sync_file)
         for package in sync['packages']:
             add_package(package, sync['servers'])
 
 def is_nagus_json(item):
-    """This function does blah."""
+    """Does this string describes a json sync file"""
     return os.path.splitext(item)[1] == '.json' and os.path.isfile(item)
 
 def keep_only(items):
-    """This function does blah."""
+    """Remove all local packages except them in `items`"""
     list_to_keep = []
     for item in items:
         if is_nagus_json(item):
@@ -141,7 +153,7 @@ def keep_only(items):
         rm_package(pkg)
 
 def main():
-    """This function does blah."""
+    """Main functioon"""
     parser = argparse.ArgumentParser()
     parser.add_argument('action', choices=('add', 'rm', 'stash', 'view', 'keep'))
     parser.add_argument('item', nargs='+')

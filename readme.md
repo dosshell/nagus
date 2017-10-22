@@ -34,8 +34,9 @@ stash.
 nagus add package_name-2.7.3 another_packge-1.0.2
 nagus add nagus_packages.json
 
-nagus add user:password@\\smbserver\share\folder\
+nagus add user:password@\\smbserver\share\folder\but\this\will\only\work\in\windows
 nagus add /folder/something/
+nagus add //server/share/folder/
 nagus add c:\folder\
 
 nagus rm package_name-2.7.3 another_package-1.0.2
