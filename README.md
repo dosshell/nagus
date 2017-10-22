@@ -13,6 +13,7 @@ similar.
 - Creeate an empty text document and create a zip file of it named `my_package-1.0.0.zip`
 - Copy the zip file to a server
 - Add a `nagus_packages.json` in you git repo with following information:
+
 ```
 {
     "packages": [
