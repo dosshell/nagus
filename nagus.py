@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#! python3
 """This module does blah blah."""
 import argparse
 import os
