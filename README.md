@@ -8,7 +8,7 @@ name. Therefor we recommend that you use to use a version naming scheme like: pa
 similar.
 
 ## Get Started
-- Install Nagus
+- Install latest Nagus from https://gitlab.com/dosshell/nagus/tags
 - Run `nagus stash ~/my_nagus_stash`
 - Creeate an empty text document and create a zip file of it named `my_package-1.0.0.zip`
 - Copy the zip file to a server
